@@ -1,7 +1,10 @@
 use std::collections::HashMap;
 use std::io::{BufRead, BufReader};
 use std::net::TcpStream;
+use std::path::Iter;
 use std::str::FromStr;
+use itertools::Itertools;
+
 use crate::http_method::HttpMethod;
 use crate::http_protocol::HttpProtocol;
 use crate::http_request::HttpRequest;
@@ -20,8 +23,8 @@ pub(crate) fn parse_http_request(request_buffered_reader: BufReader<&mut TcpStre
             Err(e) => return Err(e)
         }
     };
-    let headers = parse_headers(request);
-    let body = "".to_string();
+    let headers = parse_headers(&request);
+    let body = request.iter().skip(headers.len() + 1).join("");
 
     return Ok(HttpRequest {
         request_method: start_line.0,
@@ -32,8 +35,13 @@ pub(crate) fn parse_http_request(request_buffered_reader: BufReader<&mut TcpStre
     });
 }
 
-fn parse_headers(_lines: Vec<String>) -> HashMap<String,String> {
-    return HashMap::new();
+fn parse_headers(lines: &Vec<String>) -> HashMap<String,String> {
+    return lines.iter().clone().skip(1).take_while(|s| !s.starts_with("\r\n"))
+        .map(|s| s.split_at(s.find(':').unwrap()))
+        .fold(HashMap::new(), |mut map, (k,v)| {
+            map.insert(k.to_string(), v.to_string()).and_then(|ov| map.insert(k.to_string(), ov + "," + v));
+            map
+        });
 }
 
 fn parse_start_line(line : String) -> Result<(HttpMethod, String, HttpProtocol), &'static str> {
