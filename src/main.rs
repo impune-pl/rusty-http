@@ -58,7 +58,9 @@ fn make_response_string(response_code: &str, protocol: &HttpProtocol, mut header
         Some(body) => {
             headers.push(format!("Content-Length: {}", body.len()));
             headers.push("Content-Type: text/plain".to_string());
-            return format!("{} {}\r\n{}\r\n\r\n{}", protocol, response_code, headers.join("\r\n"), body)
+            let response = format!("{} {}\r\n{}\r\n\r\n{}", protocol, response_code, headers.join("\r\n"), body);
+            println!("Responding with:\r\n{}", response);
+            return response
         },
         None => return format!("{} {}\r\n{}\r\n\r\n***", protocol, response_code, headers.join("\r\n"))
     }

@@ -37,7 +37,7 @@ pub(crate) fn parse_http_request(request_buffered_reader: BufReader<&mut TcpStre
 
 fn parse_headers(lines: &Vec<String>) -> HashMap<String,String> {
     return lines.iter().clone().skip(1).take_while(|s| !s.starts_with("\r\n"))
-        .map(|s| s.split_at(s.find(':').unwrap()))
+        .map(|s| s.split_once(':').unwrap())
         .map(|(k,v)| (k.trim(), v.trim()))
         .fold(HashMap::new(), |mut map, (k,v)| {
             map.insert(k.to_string(), v.to_string()).and_then(|ov| map.insert(k.to_string(), ov + "," + v));
