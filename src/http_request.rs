@@ -15,6 +15,6 @@ pub(crate) struct HttpRequest {
 
 impl fmt::Display for HttpRequest {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        write!(f, "{} {} {}\r\n{}\r\n\r\n{}\r\n", self.request_method, self.path, self.protocol, self.headers.iter().map(|(k,v)| format!("{}={}", k, v)).join(", "), self.body)
+        write!(f, "{} {} {}\r\n{}\r\n\r\n{}\r\n", self.request_method, self.path, self.protocol, self.headers.iter().map(|(k,v)| format!("{} {}\r\n", k, v)).join(", "), self.body)
     }
 }
