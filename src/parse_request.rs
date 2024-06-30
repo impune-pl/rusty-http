@@ -1,8 +1,8 @@
 use std::collections::HashMap;
 use std::io::{BufRead, BufReader};
 use std::net::TcpStream;
-use std::path::Iter;
 use std::str::FromStr;
+
 use itertools::Itertools;
 
 use crate::http_method::HttpMethod;
@@ -28,7 +28,7 @@ pub(crate) fn parse_http_request(request_buffered_reader: BufReader<&mut TcpStre
 
     return Ok(HttpRequest {
         request_method: start_line.0,
-        path: start_line.1,
+        url: start_line.1,
         protocol: start_line.2,
         headers,
         body
@@ -51,7 +51,7 @@ fn parse_start_line(line : String) -> Result<(HttpMethod, String, HttpProtocol),
         None => return Err("Request first line unreadable: method missing"),
         Some(word) => HttpMethod::from_str(word)?
     };
-    let path: String = match words.next() {
+    let url: String = match words.next() {
         None => return Err("Request first line unreadable: path missing"),
         Some(word) => word.to_string()
     };
@@ -61,7 +61,7 @@ fn parse_start_line(line : String) -> Result<(HttpMethod, String, HttpProtocol),
     };
     return Ok((
         method,
-        path,
+        url,
         protocol
     ))
 }
