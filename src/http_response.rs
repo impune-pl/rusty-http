@@ -12,7 +12,7 @@ pub fn generate_response(mut request: HttpRequest) -> String {
         x if x.starts_with("/echo/") => return make_response_string(HttpResponseCode::Ok200.to_string().as_str(), &request.protocol, vec![], Some(x.strip_prefix("/echo/").unwrap().to_string())),
         x if x.starts_with("/user-agent") => return make_response_string(HttpResponseCode::Ok200.to_string().as_str(), &request.protocol, vec![], request.headers.remove("User-Agent")),
         x if x.starts_with("/files") => match request.request_method {
-            HttpMethod::POST => return make_response_for_write_file(HttpResponseCode::Ok200.to_string().as_str(), &request.protocol, vec![], Some(String::from("")), request.url, request.body),
+            HttpMethod::POST => return make_response_for_write_file(HttpResponseCode::Created201.to_string().as_str(), &request.protocol, vec![], Some(String::from("")), request.url, request.body),
             HttpMethod::GET => return make_response_from_file(&request.protocol, vec![], request.url ),
             _ => return make_response_string("404 Not Found", &request.protocol, vec![], None)
         }

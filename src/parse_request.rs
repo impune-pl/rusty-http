@@ -17,7 +17,6 @@ pub(crate) fn parse_http_request(mut request_buffered_reader: BufReader<&mut Tcp
             Err(e) => return Err(e)
         }
     };
-    println!("sline: {} {} {}", start_line.0, start_line.1, start_line.2);
     let mut h_line: Vec<Vec<u8>> = vec![];
     let mut lh_line: Vec<u8>;
     loop {
@@ -32,7 +31,6 @@ pub(crate) fn parse_http_request(mut request_buffered_reader: BufReader<&mut Tcp
                                           .map(|x| String::from_utf8(x).unwrap().trim().to_string())
                                           .filter(|x| !x.is_empty())
                                           .collect();
-    println!("headers: {}", header_lines.join("-"));
     let headers = parse_headers(&header_lines);
     let content_bytes: u64 = headers.get("Content-Length")
                                     .or(Some(&String::from("0")))
