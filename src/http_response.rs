@@ -1,5 +1,6 @@
 use std::{env, fs};
 use std::str::FromStr;
+use crate::http_method::HttpMethod;
 use crate::uniform_resource_identifier::URL;
 use crate::http_protocol::HttpProtocol;
 use crate::http_request::HttpRequest;
@@ -10,9 +11,22 @@ pub fn generate_response(mut request: HttpRequest) -> String {
         "/" => return make_response_string(HttpResponseCode::Ok200.to_string().as_str(), &request.protocol, vec![], None),
         x if x.starts_with("/echo/") => return make_response_string(HttpResponseCode::Ok200.to_string().as_str(), &request.protocol, vec![], Some(x.strip_prefix("/echo/").unwrap().to_string())),
         x if x.starts_with("/user-agent") => return make_response_string(HttpResponseCode::Ok200.to_string().as_str(), &request.protocol, vec![], request.headers.remove("User-Agent")),
-        x if x.starts_with("/files") => return make_response_from_file(&request.protocol, vec![], request.url ),
+        x if x.starts_with("/files") => match request.request_method {
+            HttpMethod::POST => return make_response_for_write_file(HttpResponseCode::Ok200.to_string().as_str(), &request.protocol, vec![], Some(String::from("")), request.url, request.body),
+            HttpMethod::GET => return make_response_from_file(&request.protocol, vec![], request.url ),
+            _ => return make_response_string("404 Not Found", &request.protocol, vec![], None)
+        }
         _ => return make_response_string("404 Not Found", &request.protocol, vec![], None)
     }
+}
+
+fn make_response_for_write_file(response_code: &str, protocol: &HttpProtocol, headers: Vec<String>, body: Option<String>, path: String, file_content: String) -> String {
+    write_file(path, file_content);
+    return make_response_string(response_code, protocol, headers, body);
+}
+
+fn write_file(path: String, file_content: String) {
+    fs::write(get_filesystem_path(path.strip_prefix("/files").map(String::from).unwrap()).unwrap(), file_content.as_str()).expect("TODO: panic message");
 }
 
 fn make_response_from_file(http_protocol: &HttpProtocol, headers: Vec<String>, url: String) -> String {
@@ -37,6 +51,7 @@ fn get_filesystem_path(url: String) -> Result<String, &'static str> {
         .skip(1)
         .next().or(Some(String::from("."))).unwrap();
     let parsed_url = URL::from_str(url.as_str())?;
+    println!("{}", base_path.clone() + parsed_url.path.clone().as_str().strip_prefix("/").unwrap());
     return Ok(base_path + parsed_url.path.clone().as_str().strip_prefix("/").unwrap());
 }
 

@@ -43,5 +43,5 @@ Note: This section is for stages 2 and beyond.
  import http.client; h = "127.0.0.1:4221"; c = http.client.HTTPConnection(h); c.request("GET", "/", headers={"Host":h}); response = c.getresponse(); print(response.status, response.reason);
 ```
 ```python
- import http.client; h = "127.0.0.1:4221"; c = http.client.HTTPConnection(h); c.request("GET", "/user-agent", headers={"Host":h,"User-Agent":"banana"}); response = c.getresponse(); print(response.status, response.reason, response.getheaders(), response.read())
+ import http.client; h = "127.0.0.1:4221"; c = http.client.HTTPConnection(h); c.request("GET", "/user-agent", headers={"Host":h,"Content-Length":5,"User-Agent":"banana"}, body="aaaaa"); response = c.getresponse(); print(response.status, response.reason, response.getheaders(), response.read())
 ```
